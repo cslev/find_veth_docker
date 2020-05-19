@@ -1,0 +1,56 @@
+#!/bin/bash
+
+ source sources/extra.sh
+
+
+function show_help
+ {
+ 	c_print "Green" "This script finds out which vethXXXX is connected to what container!"
+ 	c_print "Bold" "Example: sudo ./find_veth_docker.sh -n <CONTAINER_NAME> -i <INTEFACE_IN_CONTAINER>"
+ 	c_print "Bold" "\t\t-n <CONTAINER_NAME>: set here the name of the container (Default: No name specified, printing all containers' data)."
+  c_print "Bold" "\t\t-i <INTERFACE_IN_CONTAINER>: set here the name of the interace in the container (Default: eth0)."
+ 	exit
+ }
+
+NAME=""
+INTF="eth0"
+
+while getopts "h?n:i:" opt
+ do
+ 	case "$opt" in
+ 	h|\?)
+ 		show_help
+ 		;;
+ 	n)
+ 		NAME=$OPTARG
+ 		;;
+  i)
+    INTF=$OPTARG
+    ;;
+  *)
+ 		show_help
+ 		;;
+ 	esac
+ done
+
+
+if [ -z $NAME ]
+ then
+ 	c_print "Yellow" "No container name specified...looking for all veths...!"
+ fi
+
+ if [ -z $INTF ]
+  then
+  	c_print "Yellow" "No interface name specified in the container...Use default: ${INTF}!"
+  fi
+
+
+
+#getting the container names and interface data
+c_print "BBlue" "CONTAINER\t|VETH@HOST"
+for i in $(docker ps --format {{.Names}} |grep $NAME)
+do
+  veth_in_container=$(docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
+  veth_in_host=$(ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1)
+  c_print "Green" "${i}\t${veth_in_host}"
+done
