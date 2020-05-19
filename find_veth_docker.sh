@@ -55,5 +55,5 @@ for i in $($cmd)
 do
   veth_in_container=$(docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   veth_in_host=$(ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
-  c_print "Green" "${veth_in_host}\t${i}"
+  echo "${veth_in_host}\t${i}"
 done
