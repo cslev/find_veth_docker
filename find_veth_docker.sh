@@ -37,6 +37,9 @@ while getopts "h?n:i:" opt
 if [ -z $NAME ]
  then
  	c_print "Yellow" "No container name specified...looking for all veths...!"
+  cmd="docker ps --format {{.Names}}"
+ else
+  cmd="docker ps --format {{.Names}}|grep $NAME"
  fi
 
  if [ -z $INTF ]
