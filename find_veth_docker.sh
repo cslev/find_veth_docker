@@ -39,7 +39,7 @@ if [ -z $NAME ]
  	c_print "Yellow" "No container name specified...looking for all veths...!"
   cmd="docker ps --format {{.Names}}"
  else
-  cmd="docker ps --format {{.Names}}|grep $NAME"
+  cmd="docker ps --format {{.Names}}|grep ${NAME}"
  fi
 
  if [ -z $INTF ]
@@ -50,10 +50,10 @@ if [ -z $NAME ]
 
 
 #getting the container names and interface data
-c_print "BBlue" "CONTAINER\t|VETH@HOST"
-for i in $(docker ps --format {{.Names}} |grep $NAME)
+c_print "BBlue" "VETH@HOST\t|CONTAINER"
+for i in $($cmd)
 do
   veth_in_container=$(docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   veth_in_host=$(ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1)
-  c_print "Green" "${i}\t${veth_in_host}"
+  c_print "Green" "${veth_in_host}\t${i}"
 done
