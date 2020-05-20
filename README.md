@@ -2,7 +2,7 @@
 Simple script to find out which veth interface on the host corresponds to the eth0 interface of a container
 
 # Usage
-```bash
+```
 This script finds out which vethXXXX is connected to what container!
 Example: sudo ./find_veth_docker.sh -n <CONTAINER_NAME> -i <INTEFACE_IN_CONTAINER>
 		-n <CONTAINER_NAME>: set here the name of the container (Default: No name specified, printing all containers' data).
