@@ -13,7 +13,7 @@ function show_help
  }
 
 NAME=""
-INTF="eth0"
+INTF=""
 
 while getopts "h?n:i:" opt
  do
@@ -28,23 +28,24 @@ while getopts "h?n:i:" opt
     INTF=$OPTARG
     ;;
   *)
- 		show_help
+    show_help
  		;;
  	esac
  done
 
 
 if [ -z $NAME ]
- then
- 	c_print "Yellow" "No container name specified...looking for all veths...!"
+then
+  # c_print "Yellow" "No container name specified...looking for all veths...!"
   cmd="sudo docker ps --format {{.Names}}"
- else
+else
   cmd="sudo docker ps --format {{.Names}} -f name=$NAME"
  fi
 
  if [ -z $INTF ]
   then
-  	c_print "Yellow" "No interface name specified in the container...Use default: ${INTF}!"
+    # c_print "Yellow" "No interface name specified in the container...Using default: ${INTF}!"
+    $INTF="eth0"
   fi
 
 
