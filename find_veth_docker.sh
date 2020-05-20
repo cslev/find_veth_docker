@@ -37,9 +37,9 @@ while getopts "h?n:i:" opt
 if [ -z $NAME ]
  then
  	c_print "Yellow" "No container name specified...looking for all veths...!"
-  cmd="docker ps --format {{.Names}}"
+  cmd="sudo docker ps --format {{.Names}}"
  else
-  cmd="docker ps --format {{.Names}} -f name=$NAME"
+  cmd="sudo docker ps --format {{.Names}} -f name=$NAME"
  fi
 
  if [ -z $INTF ]
@@ -53,7 +53,7 @@ if [ -z $NAME ]
 c_print "BBlue" "VETH@HOST\tCONTAINER"
 for i in $($cmd)
 do
-  veth_in_container=$(docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
-  veth_in_host=$(ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
+  veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
+  veth_in_host=$(sudo ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
   echo -e "${veth_in_host}\t${i}"
 done
