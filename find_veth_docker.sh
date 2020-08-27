@@ -45,7 +45,7 @@ else
  if [ -z $INTF ]
   then
     # c_print "Yellow" "No interface name specified in the container...Using default: ${INTF}!"
-    $INTF="eth0"
+    INTF="eth0"
   fi
 
 
