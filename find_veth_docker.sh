@@ -55,6 +55,6 @@ c_print "BBlue" "VETH@HOST\tCONTAINER"
 for i in $($cmd)
 do
   veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
-  veth_in_host=$(sudo ip a|grep "if${veth_in_container}"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
+  veth_in_host=$(sudo ip a|grep "if${veth_in_container}:"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
   echo -e "${veth_in_host}\t${i}"
 done
