@@ -1,6 +1,7 @@
 #!/bin/bash
+ROOT="$(dirname "$0")"
 
- source sources/extra.sh
+source $ROOT/sources/extra.sh
 
 
 function show_help

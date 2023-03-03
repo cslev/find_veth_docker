@@ -66,7 +66,16 @@ function c_print ()
   then
     echo -e $text_to_print # newline at the end
   else
-    echo -en $text_to_print # NO newline at the end
+    #this is the case when we want to add status like [DONE] at the end of the line after
+    #a function has finished. Hence, we pad the original text with whitespaces accordingly
+    size=${#text_to_print}
+    cols=$(echo $(/usr/bin/tput cols))
+    fixed_status_length=6 #e.g., [DONE], [FAIL]
+    pad_size=`expr $cols - $size - $fixed_status_length` #the final size of the padding
+    #we use printf to print the padding, instead of for loops and echo
+    pad=$(printf "%*s" "$pad_size")
+
+    echo -en "${text_to_print}${pad}" # NO newline at the end
 	fi
 
 }
