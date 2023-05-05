@@ -2,14 +2,10 @@
 Simple script to find out which veth interface on the host corresponds to the eth0 interface of a container
 
 # Requirements
-After using this script in countless environments, I had to come to the conclusion that the containers in question have to have `iproute2` utility installed. The scripts uses the command `ip` in the containers to gather the necessary information. If your container does not have it, install it. 
-Don't forget that most containers are optimized for size, i.e., before installing a package you have to update the repository.
-In case of Debian/Ubuntu-based container images, do the following.
-```
-sudo docker exec -it <CONTAINER_NAME> apt-get update
-sudo docker exec -it <CONTAINER_NAME> apt-get install iproute2
-```
-For Redhat/etc-based containers, please adopt the above-mentioned commands.
+## Update (05/05/2023)
+There is no requirement anymore. The script has been refactored and rethought and now does not have any dependency from the containers. 
+Whatever container you are running, the `veth` interface can be identified.
+
 
 # Usage
 ```
