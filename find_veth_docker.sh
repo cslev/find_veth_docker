@@ -34,6 +34,12 @@ while getopts "h?n:i:" opt
  	esac
  done
 
+c_print "White" "Testing dependencies (jq)..." 1
+which jq >> /dev/null
+retval=$(echo $?)
+check_retval $retval
+
+
 
 if [ -z $NAME ]
 then
@@ -52,7 +58,7 @@ fi
 
 
 #getting the container names and interface data
-c_print "BBlue" "VETH@HOST\tCONTAINER"
+c_print "BBlue" "VETH@HOST\tIP\t\tMAC\t\t\tBridge@HOST\tCONTAINER"
 for i in $($cmd)
 do
   #getting the PIDs of the containers
@@ -62,9 +68,27 @@ do
   #using the index, we can identify the veth interface
   veth=$(ip -br addr |grep "if${INDEX}"|awk '{print $1}'|cut -d '@' -f 1)
 
+  #check if there is any special subnet created instead of the default
+  network_mode=$(docker inspect $i|jq .[].HostConfig.NetworkMode | sed "s/\"//g")
+  if [ "$network_mode" == "default" ]
+  then
+    network="bridge"
+  else
+    network=$network_mode
+  fi
+    
+  ip_address=$(docker inspect $i|jq .[].NetworkSettings.Networks.$network.IPAddress)
+  mac_address=$(docker inspect $i| jq .[].NetworkSettings.Networks.$network.MacAddress)
+  gateway=$(docker inspect $i| jq .[].NetworkSettings.Networks.$network.Gateway | sed "s/\"//g")
+  bridge=$(ip -br addr |grep $gateway|awk '{print $1}')
   #residuals from previous version that required built-in tools inside the container, but keeping them for reference
   #veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   #veth_in_host=$(sudo ip a|grep "if${veth_in_container}:"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
-
-  echo -e "${veth}\t${i}"
+  if [ "$bridge" == "docker0" ]
+  then
+    #we need an extra TAB before Bridge
+    echo -e "${veth}\t${ip_address}\t${mac_address}\t${bridge}\t\t${i}"
+  else
+    echo -e "${veth}\t${ip_address}\t${mac_address}\t${bridge}\t${i}"
+  fi
 done
