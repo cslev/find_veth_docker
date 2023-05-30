@@ -1,8 +1,16 @@
 # find_veth_docker
 Simple script to find out which veth interface on the host corresponds to the eth0 interface of a container
 
-# Requirements
-## Update (05/05/2023)
+# Changelog
+## 30/05/2023
+Added more inspection for each container considered. Besides `veth` information: 
+ - we have the IP address of the container, which can be useful, when some service is running inside and we want to use it from the host (e.g., DNSproxy, pihole)
+ - MAC address: can be useful, for instance, when crafting packets from the host and send them into the container
+ - Bridge: the docker bridge on the host the container's `veth` is connected virtually
+
+**New dependency**: `jq` for parsing JSON-output of `docker inspect` commands. Dependancy checked when running the script. If fails, please install `jq`.
+
+## 05/05/2023
 There is no requirement anymore. The script has been refactored and rethought and now does not have any dependency from the containers. 
 Whatever container you are running, the `veth` interface can be identified.
 
@@ -18,8 +26,12 @@ Example: sudo ./find_veth_docker.sh -n <CONTAINER_NAME> -i <INTEFACE_IN_CONTAINE
 # Example
 ```bash
 sudo ./find_veth_docker.sh -n google
-VETH@HOST	CONTAINER
-veth003b9c4	google
+Testing dependencies (jq)...                                                                                                                               [DONE]
+VETH@HOST       IP              MAC                     Bridge@HOST     CONTAINER
+vethb4bf178     "172.17.0.2"    "02:42:ac:11:00:02"     docker0         quirky_goodall
+vethf1cafc6     "172.30.1.3"    "02:42:ac:1e:01:03"     br-22977ef1c283 pihole
+vetha4867b4     "172.30.1.4"    "02:42:ac:1e:01:04"     br-22977ef1c283 dnscrypt-proxy
+veth5c15bec     "172.20.1.2"    "02:42:ac:14:01:02"     br-5399ca212f48 portainer
 ```
 
 # Using output for scripts
