@@ -58,7 +58,7 @@ fi
 
 
 #getting the container names and interface data
-c_print "BBlue" "VETH@HOST\tVETH_MAC\t\tCONTAINER_IP\tCONTAINER_MAC\t\tBridge@HOST\t\tCONTAINER"
+c_print "BBlue" "VETH@HOST\tVETH_MAC\t\tCONTAINER_IP\tCONTAINER_MAC\t\tBridge@HOST\t\tBridge_IP\tBridge_MAC\t\tCONTAINER"
 for i in $($cmd)
 do
   #getting the PIDs of the containers
@@ -81,14 +81,20 @@ do
   mac_address=$(sudo docker inspect $i| jq .[].NetworkSettings.Networks.$network.MacAddress | sed "s/\"//g")
   gateway=$(sudo docker inspect $i| jq .[].NetworkSettings.Networks.$network.Gateway | sed "s/\"//g")
   bridge=$(sudo ip -br addr |grep $gateway|awk '{print $1}')
+  bridge_ip=$(sudo ip a |grep $bridge |grep inet|awk '{print $2}')
+  
+  #colons are super important below, without them, grep would find the veth interfaces as well that are connected to the bridge
+  #by grepping on the ": <VETH>:", only the right line will be found
+  bridge_mac=$(ip a |grep ": ${bridge}:" -A 1| grep ether| awk '{print $2}')
+  
   #residuals from previous version that required built-in tools inside the container, but keeping them for reference
   #veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   #veth_in_host=$(sudo ip a|grep "if${veth_in_container}:"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
   if [ "$bridge" == "docker0" ]
   then
     #we need an extra TAB before Bridge
-    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t\t${i}"
+    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t\t${bridge_ip}\t${bridge_mac}\t${i}"
   else
-    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t${i}"
+    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t${bridge_ip}\t${bridge_mac}\t${i}"
   fi
 done
