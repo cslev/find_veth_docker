@@ -27,10 +27,10 @@ Example: sudo ./find_veth_docker.sh -n <CONTAINER_NAME> -i <INTEFACE_IN_CONTAINE
 ```bash
 sudo ./find_veth_docker.sh -n google
 Testing dependencies (jq)...                                                                                                                               [DONE]
-VETH@HOST       VETH_MAC                CONTAINER_IP    CONTAINER_MAC           Bridge@HOST             CONTAINER
-vethf1cafc6     26:9e:b8:64:db:f8       172.30.1.3      02:42:ac:1e:01:03       br-22977ef1c283         pihole
-vetha4867b4     62:5d:d2:59:81:1e       172.30.1.4      02:42:ac:1e:01:04       br-22977ef1c283         dnscrypt-proxy
-veth5c15bec     b6:e6:17:5c:ef:82       172.20.1.2      02:42:ac:14:01:02       br-5399ca212f48         portainer
+VETH@HOST	VETH_MAC		CONTAINER_IP	CONTAINER_MAC		Bridge@HOST		Bridge_IP	Bridge_MAC		CONTAINER
+vethf1cafc6	26:9e:b8:64:db:f8	172.30.1.3	02:42:ac:1e:01:03	br-22977ef1c283		172.30.1.1/24	02:42:1e:ba:ce:ed	pihole
+vetha4867b4	62:5d:d2:59:81:1e	172.30.1.4	02:42:ac:1e:01:04	br-22977ef1c283		172.30.1.1/24	02:42:1e:ba:ce:ed	dnscrypt-proxy
+veth5c15bec	b6:e6:17:5c:ef:82	172.20.1.2	02:42:ac:14:01:02	br-5399ca212f48		172.20.1.1/24	02:42:a6:fc:1a:a0	portainer
 ```
 
 # Using output for scripts
