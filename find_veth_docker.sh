@@ -61,12 +61,13 @@ fi
 c_print "BBlue" "VETH@HOST\tVETH_MAC\t\tCONTAINER_IP\tCONTAINER_MAC\t\tBridge@HOST\t\tBridge_IP\tBridge_MAC\t\tCONTAINER"
 for i in $($cmd)
 do
+  # c_print "BWhite" "${i}"
   #getting the PIDs of the containers
   PID=$(sudo docker inspect $i --format "{{.State.Pid}}")
   #using the PID, we can get the interface index of the eth0 interfae inside the container
-  INDEX=$(sudo cat /proc/$PID/net/igmp |grep $INTF| awk '{print $1}')
+  INDEX=$(sudo cat /proc/$PID/net/igmp |grep "$INTF"| awk '{print $1}') 
   #using the index, we can identify the veth interface
-  veth=$(sudo ip -br addr |grep "if${INDEX}"|awk '{print $1}'|cut -d '@' -f 1)
+  veth=$(sudo ip -br addr |grep "if${INDEX} "|awk '{print $1}'|cut -d '@' -f 1) #we need that extra whitespace at grep "if${INDEX} ", otherwise interface with the prefix will shown too
   veth_mac=$(sudo ip a|grep $veth -A 2|grep ether|awk '{print $2}')
   #check if there is any special subnet created instead of the default
   network_mode=$(sudo docker inspect $i|jq .[].HostConfig.NetworkMode | sed "s/\"//g")
