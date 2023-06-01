@@ -33,6 +33,20 @@ vetha4867b4	62:5d:d2:59:81:1e	172.30.1.4	02:42:ac:1e:01:04	br-22977ef1c283		172.
 veth5c15bec	b6:e6:17:5c:ef:82	172.20.1.2	02:42:ac:14:01:02	br-5399ca212f48		172.20.1.1/24	02:42:a6:fc:1a:a0	portainer
 ```
 
+# Troubleshooting
+If you have an error like this:
+```
+jq: error: proxy/0 is not defined at <top-level>, line 1:
+.[].NetworkSettings.Networks.dnscrypt-proxy-research_subnet                                      
+jq: error: research_subnet/0 is not defined at <top-level>, line 1:
+.[].NetworkSettings.Networks.dnscrypt-proxy-research_subnet                                            
+jq: 2 compile errors
+```
+It is caused by the docker subnet's name you have assigned. As you can see above, I created a `dnscrypt-proxy-research_subnet`, and `jq` cannot parse the corresponding JSON anymore. This is caused by the `-` characters in the subnet name.
+
+Please avoid using `-` and use `_` instead. Then, `jq` will work as expected.
+
+
 # Using output for scripts
 You might want to change some setting for a particular container's `vethXXXX` device. Let's take an example for `ethtool` that disables checksumming on the interfaces.
 ```bash
