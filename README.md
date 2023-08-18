@@ -14,6 +14,18 @@ Added more inspection for each container considered. Besides `veth` information:
 There is no requirement anymore. The script has been refactored and rethought and now does not have any dependency from the containers. 
 Whatever container you are running, the `veth` interface can be identified.
 
+## 18/08/2023
+When defining your own network stack, do not use dashes ('-') in the network name. Use only underscores ('_').
+For instance, in your `docker-compose.yml`, follow this approach
+```
+networks:
+  internal:
+    name: adguard_proxy_network
+    ipam:
+      config:
+        - subnet: 172.22.1.0/24
+```
+Mind the '_' in the `name` field.
 
 # Usage
 ```
