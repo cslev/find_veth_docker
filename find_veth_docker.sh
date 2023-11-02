@@ -45,9 +45,24 @@ if [ -z $NAME ]
 then
   # c_print "Yellow" "No container name specified...looking for all veths...!"
   cmd="sudo docker ps --format {{.Names}}"
+  # testing cmd
+  cmd_test=$($cmd)
+  if [[ -z $cmd_test ]]
+  then
+    c_print "Red" "There is no container running on the system..."
+    exit
+  fi
+
 else
   cmd="sudo docker ps --format {{.Names}} -f name=$NAME"
- fi
+  # testing cmd
+  cmd_test=$($cmd)
+  if [[ -z $cmd_test ]]
+  then
+    c_print "Red" "There is no container running on the system with the name ${NAME}.."
+    exit
+  fi
+fi
 
 if [ -z $INTF ]
 then
@@ -70,7 +85,8 @@ do
   veth=$(sudo ip -br addr |grep "if${INDEX} "|awk '{print $1}'|cut -d '@' -f 1) #we need that extra whitespace at grep "if${INDEX} ", otherwise interface with the prefix will shown too
   veth_mac=$(sudo ip a|grep $veth -A 2|grep ether|awk '{print $2}')
   #check if there is any special subnet created instead of the default
-  network_mode=$(sudo docker inspect $i|jq .[].HostConfig.NetworkMode | sed "s/\"//g")
+  network_mode=$(sudo docker inspect $i|jq -r .[].HostConfig.NetworkMode)
+
   if [ "$network_mode" == "default" ]
   then
     network="bridge"
@@ -78,16 +94,22 @@ do
     network=$network_mode
   fi
     
-  ip_address=$(sudo docker inspect $i|jq .[].NetworkSettings.Networks.$network.IPAddress | sed "s/\"//g")
-  mac_address=$(sudo docker inspect $i| jq .[].NetworkSettings.Networks.$network.MacAddress | sed "s/\"//g")
-  gateway=$(sudo docker inspect $i| jq .[].NetworkSettings.Networks.$network.Gateway | sed "s/\"//g")
+  ip_address=$(sudo docker inspect $i|jq -r .[].NetworkSettings.Networks.$network.IPAddress)
+  mac_address=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.MacAddress)
+  gateway=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.Gateway)
   bridge=$(sudo ip -br addr |grep $gateway|awk '{print $1}')
-  bridge_ip=$(sudo ip a |grep $bridge |grep inet|awk '{print $2}')
+  if [[ -z $bridge ]]
+  then
+    bridge="N/A"
+    bridge_ip="N/A"
+    bridge_mac="N/A"
+  else
+    bridge_ip=$(sudo ip a |grep $bridge |grep inet|awk '{print $2}')
   
-  #colons are super important below, without them, grep would find the veth interfaces as well that are connected to the bridge
-  #by grepping on the ": <VETH>:", only the right line will be found
-  bridge_mac=$(ip a |grep ": ${bridge}:" -A 1| grep ether| awk '{print $2}')
-  
+    #colons are super important below, without them, grep would find the veth interfaces as well that are connected to the bridge
+    #by grepping on the ": <VETH>:", only the right line will be found
+    bridge_mac=$(ip a |grep ": ${bridge}:" -A 1| grep ether| awk '{print $2}')
+  fi
   #residuals from previous version that required built-in tools inside the container, but keeping them for reference
   #veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   #veth_in_host=$(sudo ip a|grep "if${veth_in_container}:"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
