@@ -83,7 +83,14 @@ do
   INDEX=$(sudo cat /proc/$PID/net/igmp |grep "$INTF"| awk '{print $1}') 
   #using the index, we can identify the veth interface
   veth=$(sudo ip -br addr |grep "if${INDEX} "|awk '{print $1}'|cut -d '@' -f 1) #we need that extra whitespace at grep "if${INDEX} ", otherwise interface with the prefix will shown too
-  veth_mac=$(sudo ip a|grep $veth -A 2|grep ether|awk '{print $2}')
+  if [[ -z $veth ]]
+  then
+    veth="N/A\t" #add extra Tabs straight away for prettify
+    veth_mac="N/A\t\t" #add extra Tabs straight away for prettify
+  else
+    veth_mac=$(sudo ip a|grep $veth -A 2|grep ether|awk '{print $2}')
+  fi
+
   #check if there is any special subnet created instead of the default
   network_mode=$(sudo docker inspect $i|jq -r .[].HostConfig.NetworkMode)
 
@@ -97,18 +104,25 @@ do
   ip_address=$(sudo docker inspect $i|jq -r .[].NetworkSettings.Networks.$network.IPAddress)
   mac_address=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.MacAddress)
   gateway=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.Gateway)
-  bridge=$(sudo ip -br addr |grep $gateway|awk '{print $1}')
-  if [[ -z $bridge ]]
+  if [[ -z $gateway ]]
   then
-    bridge="N/A"
-    bridge_ip="N/A"
-    bridge_mac="N/A"
+    bridge="N/A\t"
+    bridge_ip="N/A\t"
+    bridge_mac="N/A\t\t"
   else
-    bridge_ip=$(sudo ip a |grep $bridge |grep inet|awk '{print $2}')
-  
-    #colons are super important below, without them, grep would find the veth interfaces as well that are connected to the bridge
-    #by grepping on the ": <VETH>:", only the right line will be found
-    bridge_mac=$(ip a |grep ": ${bridge}:" -A 1| grep ether| awk '{print $2}')
+    bridge=$(sudo ip -br addr |grep $gateway|awk '{print $1}')
+    if [[ -z $bridge ]]
+    then
+      bridge="N/A\t"
+      bridge_ip="N/A"
+      bridge_mac="N/A"
+    else
+      bridge_ip=$(sudo ip a |grep $bridge |grep inet|awk '{print $2}')
+    
+      #colons are super important below, without them, grep would find the veth interfaces as well that are connected to the bridge
+      #by grepping on the ": <VETH>:", only the right line will be found
+      bridge_mac=$(ip a |grep ": ${bridge}:" -A 1| grep ether| awk '{print $2}')
+    fi
   fi
   #residuals from previous version that required built-in tools inside the container, but keeping them for reference
   #veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
@@ -121,3 +135,5 @@ do
     echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t${bridge_ip}\t${bridge_mac}\t${i}"
   fi
 done
+c_print "Yellow" "\n\nIf you see N/A for veth, try using different interface identifier, e.g., eth1"
+
