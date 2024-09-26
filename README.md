@@ -52,20 +52,6 @@ VETH@HOST	VETH_MAC		CONTAINER_IP	CONTAINER_MAC		Bridge@HOST		Bridge_IP	Bridge_MA
 vethf1cafc6	26:9e:b8:64:db:f8	172.30.1.3	02:42:ac:1e:01:03	br-22977ef1c283		172.30.1.1/24	02:42:1e:ba:ce:ed	pihole
 ```
 
-# Troubleshooting
-If you have an error like this:
-```
-jq: error: proxy/0 is not defined at <top-level>, line 1:
-.[].NetworkSettings.Networks.dnscrypt-proxy-research_subnet                                      
-jq: error: research_subnet/0 is not defined at <top-level>, line 1:
-.[].NetworkSettings.Networks.dnscrypt-proxy-research_subnet                                            
-jq: 2 compile errors
-```
-It is caused by the docker subnet's name you have assigned. As you can see above, I created a `dnscrypt-proxy-research_subnet`, and `jq` cannot parse the corresponding JSON anymore. This is caused by the `-` characters in the subnet name.
-
-Please avoid using `-` and use `_` instead. Then, `jq` will work as expected.
-
-
 # Using output for scripts
 You might want to change some setting for a particular container's `vethXXXX` device. Let's take an example for `ethtool` that disables checksumming on the interfaces.
 ```bash

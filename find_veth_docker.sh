@@ -101,9 +101,9 @@ do
     network=$network_mode
   fi
     
-  ip_address=$(sudo docker inspect $i|jq -r .[].NetworkSettings.Networks.$network.IPAddress)
-  mac_address=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.MacAddress)
-  gateway=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.Gateway)
+  ip_address=$(sudo docker inspect $i|jq -r ".[].NetworkSettings.Networks.\"$network\".IPAddress")
+  mac_address=$(sudo docker inspect $i| jq -r ".[].NetworkSettings.Networks.\"$network\".MacAddress")
+  gateway=$(sudo docker inspect $i| jq -r ".[].NetworkSettings.Networks.\"$network\".Gateway")
   if [[ -z $gateway ]]
   then
     bridge="N/A\t"
