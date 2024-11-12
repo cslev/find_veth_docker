@@ -9,7 +9,8 @@ Added more inspections for each container considered. Besides `veth` information
  - Bridge: the docker bridge on the host the container's `veth` is connected virtually
 
 **New dependency**: `jq` for parsing JSON-output of `docker inspect` commands. Dependency checked when running the script. If it fails, please install `jq`.
-
+## 12/11/2024
+Add image info to the output as a new column
 ## 05/05/2023
 There is no requirement anymore. The script has been refactored and rethought and now does not have any dependency from the containers. 
 Whatever container you are running, the `veth` interface can be identified.
