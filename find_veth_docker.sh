@@ -73,7 +73,7 @@ fi
 
 
 #getting the container names and interface data
-c_print "BBlue" "VETH@HOST\tVETH_MAC\t\tCONTAINER_IP\tCONTAINER_MAC\t\tBridge@HOST\t\tBridge_IP\tBridge_MAC\t\tCONTAINER"
+c_print "BBlue" "VETH@HOST\tVETH_MAC\t\tCONTAINER_IP\tCONTAINER_MAC\t\tBridge@HOST\t\tBridge_IP\tBridge_MAC\t\tCONTAINER\t\tImage"
 for i in $($cmd)
 do
   # c_print "BWhite" "${i}"
@@ -102,6 +102,7 @@ do
   fi
     
   ip_address=$(sudo docker inspect $i|jq -r .[].NetworkSettings.Networks.$network.IPAddress)
+  image=$(sudo docker inspect $i|jq -r .[].Config.Image)
   mac_address=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.MacAddress)
   gateway=$(sudo docker inspect $i| jq -r .[].NetworkSettings.Networks.$network.Gateway)
   if [[ -z $gateway ]]
@@ -127,12 +128,22 @@ do
   #residuals from previous version that required built-in tools inside the container, but keeping them for reference
   #veth_in_container=$(sudo docker exec $i ip a|grep ${INTF}@|cut -d ':' -f 1)
   #veth_in_host=$(sudo ip a|grep "if${veth_in_container}:"|cut -d ":" -f 2|cut -d '@' -f 1|sed "s/ //g")
+
+  #the number of characters in the container name can be arbitrarily short, for that we need use Tabs wisely
+  # get the number of chars of the container name
+  num_chars_name=${#i}
+  extra_tab=""
+  if [ $num_chars_name -lt 7 ]
+  then
+    extra_tab="\t"
+  fi
+
   if [ "$bridge" == "docker0" ]
   then
     #we need an extra TAB before Bridge
-    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t\t${bridge_ip}\t${bridge_mac}\t${i}"
+    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t\t${bridge_ip}\t${bridge_mac}\t${i}\t${extra_tab}${image}"
   else
-    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t${bridge_ip}\t${bridge_mac}\t${i}"
+    echo -e "${veth}\t${veth_mac}\t${ip_address}\t${mac_address}\t${bridge}\t\t${bridge_ip}\t${bridge_mac}\t${i}\t${extra_tab}${image}"
   fi
 done
 c_print "Yellow" "\n\nIf you see N/A for veth, try using different interface identifier, e.g., eth1"
