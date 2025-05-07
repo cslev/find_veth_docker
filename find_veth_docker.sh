@@ -34,8 +34,13 @@ while getopts "h?n:i:" opt
  	esac
  done
 
-c_print "White" "Testing dependencies (jq)..." 1
+c_print "White" "Testing dependency: jq (pkg: jq)..." 1
 which jq >> /dev/null
+retval=$(echo $?)
+check_retval $retval
+
+c_print "White" "Testing dependency: nsenter (pkg: util-linux)..." 1
+which nsenter >> /dev/null
 retval=$(echo $?)
 check_retval $retval
 
@@ -79,10 +84,12 @@ do
   # c_print "BWhite" "${i}"
   #getting the PIDs of the containers
   PID=$(sudo docker inspect $i --format "{{.State.Pid}}")
-  #using the PID, we can get the interface index of the eth0 interfae inside the container
-  INDEX=$(sudo cat /proc/$PID/net/igmp |grep "$INTF"| awk '{print $1}') 
-  #using the index, we can identify the veth interface
-  veth=$(sudo ip -br addr |grep "if${INDEX} "|awk '{print $1}'|cut -d '@' -f 1) #we need that extra whitespace at grep "if${INDEX} ", otherwise interface with the prefix will shown too
+  #getting the veth iface ID using nsenter
+  INDEX=$(sudo nsenter -t $PID -n ip a|grep "${INTF}@"|awk '{print $2}'|cut -d '@' -f 2|cut -d "f" -f 2)
+  # #using the PID, we can get the interface index of the eth0 interfae inside the container
+  # INDEX=$(sudo cat /proc/$PID/net/igmp |grep "$INTF"| awk '{print $1}') 
+  # #using the index, we can identify the veth interface
+  veth=$(sudo ip a|grep "${INDEX} veth"|awk '{print $2}'|cut -d '@' -f 1)
   if [[ -z $veth ]]
   then
     veth="N/A\t" #add extra Tabs straight away for prettify
