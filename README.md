@@ -2,6 +2,8 @@
 Simple script to find out which veth interface on the host corresponds to the eth0 interface of a container
 
 # Changelog
+## 05/2025
+Modified script to gather the relevant info from the containers according to the latest docker releases.
 ## 12/11/2024
 Add image info to the output as a new column
 ## 30/05/2023
